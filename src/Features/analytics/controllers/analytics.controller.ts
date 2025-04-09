@@ -238,6 +238,8 @@ export class AnalyticsController {
       ]);
       
 
+      console.log('accounts :>> ', accounts);
+
       // PROPERTY
       const totalBloks = await Property.aggregate([
         { $match: { status: "ACTIVE" } },
@@ -252,21 +254,21 @@ export class AnalyticsController {
       const totalPropertyBlocks = totalBloks[0]?.total || 0;
       console.log("Total ACTIVE blocks:", totalPropertyBlocks);
 
-      const monthlyIncome = 0;
-console.log('analytics :>> ', analytics);
+      const annualRentalYield = (((analytics.total_revenue_paid_ytd / analytics.number_of_months_payments) / totalInvestmentBalance) * 12) * 100;
+console.log('annualRentalYield :>> ', annualRentalYield);
 
       return res.status(200).json({
         success: true,
         message: "Analytics(portfolio) successful response",
         response: {
-          cashBalance: accounts[0].totalBalance,
+          cashBalance: accounts.length>0 ? accounts[0].totalBalance : 0,
           blocksOwned,
           portfolioValue: totalInvestmentBalance,
           totalPropertyBlocks,
           totalProperties,
           monthlyIncome: (analytics.last_year_revenue / totalPropertyBlocks) * blocksOwned,
-          totalIncome: 100,
-          annualRentalYield: (((analytics.total_revenue_paid_ytd/analytics.number_of_months_payments)/totalInvestmentBalance)*12)*100,
+          totalIncome: blocksOwned==0 ? 0 : 100,
+          annualRentalYield: (annualRentalYield === Infinity || isNaN(annualRentalYield)) ? 0 : annualRentalYield,
         },
       });
     } catch (e) {
@@ -323,7 +325,7 @@ console.log('analytics :>> ', analytics);
         success: true,
         message: "Analytics(wallet) successful response",
         response: {
-          cashBalance: accounts[0].totalBalance,
+          cashBalance: accounts.length>0 ? accounts[0].totalBalance : 0,
           blocksOwned,
           totalInvestmentBalance
         },

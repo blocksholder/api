@@ -14,8 +14,13 @@ Router.post("/",
 });
 
 // Get All Callback Requests
-Router.get("/", (req: Request, res: Response) => {
+Router.get("/", authentication,(req: Request, res: Response) => {
   CallbackController.findAll(req,res);
+});
+
+// Get All Callback Requests
+Router.get("/", (req: Request, res: Response) => {
+  CallbackController.findAllAdmin(req,res);
 });
 
 // Get Single Callback Request

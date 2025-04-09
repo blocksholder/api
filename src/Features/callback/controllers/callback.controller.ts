@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import CallBack from "../schema/callback.schema";
+import mongoose from "mongoose";
 
 class CallbackController {
   // Create Callback Request
@@ -23,6 +24,17 @@ class CallbackController {
 
   // Get All Callback Requests
   static async findAll(req: Request, res: Response) {
+    try {
+      const userId = new mongoose.Types.ObjectId(req['currentUser'].id);
+      const requests = await CallBack.find({user: userId}).sort({ createdAt: -1 });
+      return res.status(200).json({message:'Success', data:requests});
+    } catch (error) {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  // Get All Callback Requests
+  static async findAllAdmin(req: Request, res: Response) {
     try {
       const requests = await CallBack.find().sort({ createdAt: -1 });
       return res.status(200).json({message:'Success', data:requests});
