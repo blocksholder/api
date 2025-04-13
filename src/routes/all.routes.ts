@@ -2,6 +2,7 @@ import * as express from "express";
 import path = require("path");
 
 import userRoutes from "../Features/auth/route/user.routes";
+import manageUserRoutes from '../Features/auth/route/manage.users.routes';
 import authRoutes from "../Features/auth/route/auth.routes";
 import propertyRoutes from '../Features/property/route/property.route';
 import callbackRoutes from '../Features/callback/route/callback.route';
@@ -30,6 +31,8 @@ Router.use("/auth", authRoutes);
  *     summary: User routes
  */
 Router.use("/users", userRoutes);
+
+Router.use("/admin", manageUserRoutes);
 
 Router.use("/property", propertyRoutes);
  

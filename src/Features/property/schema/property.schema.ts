@@ -14,8 +14,7 @@ const DocumentSchema = new mongoose.Schema({
 
 const KeyMetricSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    value: { type: String, required: true },
-    description: { type: String, required: true }
+    value: { type: String, required: true }
 });
 
 const LocationSchema = new mongoose.Schema({
@@ -56,7 +55,7 @@ const PropertySchema = new mongoose.Schema({
     total_investors: { type: Number, required: true },
     yearly_investment_return: { type: Number, required: true },
     projected_net_yield: { type: Number, required: true },
-    return_on_quality: { type: Number, required: true },
+    return_on_equity: { type: Number, required: true },
     appreciation_rate: { type: Number, required: true },
     currency: { type: String, required: true },
     description: { type: String, required: true },

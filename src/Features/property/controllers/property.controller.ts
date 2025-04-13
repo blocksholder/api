@@ -16,25 +16,28 @@ export class PropertyController {
     try {
       const {
         type,
-        title,
-        location,
+        // title,
         project_cost,
-        current_investors,
+        // current_investors,
         total_bloks,
         available_bloks,
         blok_cost,
-        property_details,
+        location,
         key_metrics,
-        total_investors,
+        property_details,
+        
+        // total_investors,
         yearly_investment_return,
         projected_net_yield,
-        return_on_quality,
+        return_on_equity,
         appreciation_rate,
-        currency,
+        // currency,
         description
       } = req.body;
 
-      if (!type || !location || !property_details || !currency || !description) {
+    console.log('req.body :>> ', req.body);
+
+      if (!type  || !description) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
@@ -44,22 +47,22 @@ export class PropertyController {
 
       const newProperty = new Property({
         type,
-        title,
+        title: type,
         images: imageUrl ? [{ url: imageUrl }] : [],
         location: JSON.parse(location),
         project_cost,
-        current_investors,
+        current_investors:0,
         total_bloks,
         available_bloks,
         blok_cost,
         property_details: JSON.parse(property_details),
         key_metrics: JSON.parse(key_metrics),
-        total_investors,
+        total_investors:0,
         yearly_investment_return,
         projected_net_yield,
-        return_on_quality,
+        return_on_equity,
         appreciation_rate,
-        currency,
+        currency:'USD',
         description
       });
 
@@ -236,6 +239,9 @@ export class PropertyController {
         return res.status(404).json({ error: "Property not found" });
       }
   
+      console.log('req.params :>> ', req.params);
+      console.log('req.body :>> ', req.body);
+      console.log('property.images :>> ', property.images);
       // Find the image to remove
       const imageIndex = property.images.findIndex(img => img._id.toString() === imageId);
       if (imageIndex === -1) {
