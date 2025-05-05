@@ -33,6 +33,8 @@ const InvestmentAccountSchema: Schema = new Schema(
     type: { type: String, enum: ["PERSONAL", "COMPANY"], default: "PERSONAL" },
     accountID: { type: String, unique: true, required: true, default: generateAccountID },
     accountName: { type: String, required: true },
+    address: { type: String, required: false },
+    email: { type: String, required: false },
     balance: { type: Number, default: 0 },
     status: { type: String, enum: ["VERIFIED", "PENDING", "REJECTED"], default: "PENDING" },
     documents: [DocumentSchema]

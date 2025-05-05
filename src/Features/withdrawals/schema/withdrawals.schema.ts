@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 import * as crypto from "crypto"; 
-
+import { PaymentDetailsSchema } from "../../paymentDetails/schema/payment.schema";
+PaymentDetailsSchema
 export interface IWithdrawalRequest extends Document {
   user: mongoose.Types.ObjectId;
   resourceId: string;
-  paymentDetails: mongoose.Types.ObjectId;
+  paymentDetails?: typeof PaymentDetailsSchema;
   investmentAccount: mongoose.Types.ObjectId;
     amount: number;
     lastBalance?: number;
@@ -22,7 +23,7 @@ const WithdrawalRequestSchema = new Schema<IWithdrawalRequest>(
   {
     resourceId: { type: String, unique: true, required: true, default: generateRefID },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    paymentDetails: { type: mongoose.Schema.Types.ObjectId, ref: "PaymentDetails", required: true },
+    paymentDetails: {type: PaymentDetailsSchema},
     investmentAccount: { type: mongoose.Schema.Types.ObjectId, ref: "InvestmentAccount", required: true },
         amount: { type: Number, required: true, min: 1 },
         lastBalance: { type: Number, required: true, min: 1 },

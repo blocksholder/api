@@ -12,7 +12,7 @@ export interface IPaymentDetails extends Document {
   createdAt: Date;
 }
 
-const PaymentDetailsSchema = new Schema<IPaymentDetails>(
+export const PaymentDetailsSchema = new Schema<IPaymentDetails>(
   {
     user: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
     type: {type: String, enum: ["BANK", "CHECK"], required: true},

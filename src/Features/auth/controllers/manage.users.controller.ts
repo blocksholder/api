@@ -10,6 +10,7 @@ import Bookmark from "../schema/bookmark.schema";
 import SavedForLater from "../schema/saveForLater.schema";
 import * as path from "path";
 import * as fs from "fs";
+import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.schema";
 // Extend Express Request to include Multer's file property
 interface MulterRequest extends Request {
   file: multer.File;
@@ -78,6 +79,18 @@ export class ManageUsersController {
           
             const id = req.params.id;
           const data = req.body;
+
+          const userData = await User.findById(id);
+          console.log('userData :>> ', userData);
+          if (!userData) {
+            return res.status(404).json({message:"Account not found"});
+          }
+          else if (data.verified == true && !userData.verified) {
+             await InvestmentAccount.create({ user:id, status:'VERIFIED', accountName:`${userData.firstname} ${userData.lastname}`});
+          }
+    
+          
+    
     
     
           User.updateOne({_id: id}, {...data}, {upsert: false})

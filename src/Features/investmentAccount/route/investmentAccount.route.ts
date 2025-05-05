@@ -15,15 +15,29 @@ const Router = express.Router();
 Router.post(
   "/",
   authentication,
-  upload.array("investment_documents",3),
+  upload.array("investment_documents"),
   (req: MulterRequest, res: Response) => {
     InvestmentAccountController.create(req, res);
+  }
+);
+
+// Create Investment Account
+Router.post(
+  "/personal",
+  authentication,
+  (req: Request, res: Response) => {
+    InvestmentAccountController.createPersonal(req, res);
   }
 );
 
 // Get All Investment Accounts
 Router.get("/", authentication, (req: Request, res: Response) => {
   InvestmentAccountController.getAll(req, res);
+});
+
+// Get All Investment Accounts
+Router.get("/admin", authentication, (req: Request, res: Response) => {
+  InvestmentAccountController.getAllAdmin(req, res);
 });
 
 // Get Single Investment Account
