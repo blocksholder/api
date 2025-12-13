@@ -2,7 +2,7 @@ import * as nodemailer from 'nodemailer';
 
 export const sendMail = (to: string,firstname:string, subject: string, html: string, data:any) => {
     const transporter = nodemailer.createTransport({
-        host: 'awinteck.com',//process.env.MAIL_HOST,
+        host: process.env.MAIL_HOST,
         port:465,
         secure: true,
         authMethod:"PLAIN",
