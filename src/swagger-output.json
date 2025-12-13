@@ -5,7 +5,7 @@
     "title": "REST API",
     "description": ""
   },
-  "host": "localhost:3000",
+  "host": "localhost:4000",
   "basePath": "/",
   "schemes": [
     "http"
@@ -2386,7 +2386,7 @@
         "properties": {
           "url": {
             "type": "string",
-            "example": "http://localhost:3000"
+            "example": "http://localhost:4000"
           },
           "description": {
             "type": "string",
