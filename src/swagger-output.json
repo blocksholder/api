@@ -5,7 +5,7 @@
     "title": "REST API",
     "description": ""
   },
-  "host": "localhost:4000",
+  "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
     "http"
