@@ -1,12 +1,12 @@
 
 import { Express, Request, Response } from "express"
-import * as express from 'express';
+import express from 'express';
 import * as bodyParser from "body-parser";
 import { Router } from "./routes/all.routes";
 import "reflect-metadata";
 import * as dotenv from 'dotenv';
 import { errorHandler } from "./middlewares/errorHandler.middleware";
-import * as cors from 'cors';
+import cors from 'cors';
 import path = require("path");
 import connectToDatabase from "./database/data-source";
 const swaggerUi = require("swagger-ui-express");

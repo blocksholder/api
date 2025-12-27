@@ -17,6 +17,7 @@ yarn-error.log
 dist/
 build/
 public/
+attachments/
 
 # TypeScript compiled files
 *.tsbuildinfo

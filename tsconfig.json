@@ -8,8 +8,8 @@
       "module": "commonjs",
       "moduleResolution": "node",
       "outDir": "./build",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "strict": true,
       "sourceMap": true,
       "typeRoots": ["./node_modules/@types", "./src/types"]
    },
