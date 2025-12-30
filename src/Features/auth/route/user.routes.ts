@@ -11,7 +11,7 @@ import { authorization } from "../../../middlewares/authorization.middleware";
 
 // Extend Express Request to include Multer's file property
 interface MulterRequest extends Request {
-  file: multer.File;
+  file?: Express.Multer.File;
 }
 
 const Router = express.Router();
@@ -49,7 +49,7 @@ Router.patch("/update-image",
     authentication,
     upload.single("user"),
     (req: MulterRequest, res: Response) => { 
-       UserController.updateProfileImage(req,res)
+       UserController.updateProfileImage(req,res) // when file is set to "optional" an error happens: Argument of type 'MulterRequest' is not assignable to parameter of type 'MulterRequest'. Property 'file' is optional in type 'MulterRequest' but required in type 'MulterRequest'
     }
 );
 
@@ -60,8 +60,8 @@ Router.patch("/update-image",
 Router.patch("/document",
     authentication,
     upload.single("user_document"),
-    (req: MulterRequest, res: Response) => { 
-       UserController.uploadDocument(req,res)
+    (req: MulterRequest, res: Response) => {
+      UserController.uploadDocument(req, res); // when file is set to "optional" an error happens: Argument of type 'MulterRequest' is not assignable to parameter of type 'MulterRequest'. Property 'file' is optional in type 'MulterRequest' but required in type 'MulterRequest'
     }
 );
 

@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import Property from "../../property/schema/property.schema";
 import Block from "../schema/blocks.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 
 class BlockController {
 
 
     // Get all blocks
-    static async getAllBlocks(req: Request, res: Response) {
+    static async getAllBlocks(req: RequestWithUser, res: Response) {
       try {
-        const userId = req['currentUser'].id
+        const userId = req.currentUser?.id
         const blocks = await Block.find({ userId, status: "ACTIVE" })
           // .populate("propertyId").populate("userId");
         return res.status(200).json({ message: "Blocks fetched successfully", data: blocks });

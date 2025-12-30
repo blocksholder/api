@@ -1,9 +1,10 @@
 import {Request, Response} from "express";
 import PaymentDetails from "../schema/payment.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 class PaymentController {
   // Create Payment Details
-  static async create(req: Request, res: Response) {
+  static async create(req: RequestWithUser, res: Response) {
     try {
       const {
         type,
@@ -13,7 +14,7 @@ class PaymentController {
         bank_name,
         check_number,
       } = req.body;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       if (!type || !account_name || !account_number) {
         return res.status(400).json({error: "Missing required fields"});
@@ -49,9 +50,9 @@ class PaymentController {
   }
 
   // Get All Payment Details for a User
-  static async findAll(req: Request, res: Response) {
+  static async findAll(req: RequestWithUser, res: Response) {
     try {
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const payments = await PaymentDetails.find({user, status:{$ne: 'DELETED'}}).sort({createdAt: -1});
       return res.status(200).json({message:"Success", data:payments});
     } catch (error) {
@@ -60,10 +61,10 @@ class PaymentController {
   }
 
   // Get Single Payment Detail
-  static async findById(req: Request, res: Response) {
+  static async findById(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const payment = await PaymentDetails.findOne({_id: id, user});
 
       if (!payment) {
@@ -77,10 +78,10 @@ class PaymentController {
   }
 
   // Update Payment Details
-  static async update(req: Request, res: Response) {
+  static async update(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const updates = req.body;
 
       const updatedPayment = await PaymentDetails.findOneAndUpdate(
@@ -100,10 +101,10 @@ class PaymentController {
   }
 
   // Update Payment Status to "DELETED" Instead of Permanent Deletion
-  static async delete(req: Request, res: Response) {
+  static async delete(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const updatedPayment = await PaymentDetails.findOneAndUpdate(
         {_id: id, user},

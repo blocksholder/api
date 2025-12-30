@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import {UserResponse} from "../dto/user.dto";
 import {Status} from "../enums/status.enum";
+import {RequestWithUser} from "../../../types/request-with-user";
 import multer from "multer";
 import User from "../schema/user.schema";
 import {encrypt} from "../../../helpers/tokenizer";
@@ -10,27 +11,28 @@ import Bookmark from "../schema/bookmark.schema";
 import SavedForLater from "../schema/saveForLater.schema";
 import * as path from "path";
 import * as fs from "fs";
+import { generateSecureFilePath } from "../../../helpers/filePathHelper";
 // Extend Express Request to include Multer's file property
 interface MulterRequest extends Request {
-  file: multer.File;
+  file?: Express.Multer.File;
 }
 export class UserController {
   // Admin routes
 
   // GET PROFILE
-  static async profile(req: Request, res: Response) {
+  static async profile(req: RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
       User.findOne({_id: id})
         .populate("documents")
         .populate("referredUsers")
-        .then((response) => {
+        .then((response: any) => {
           return res.status(201).json({
             message: "User success",
             response,
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "User failed",
             other: error,
@@ -44,9 +46,9 @@ export class UserController {
     }
   }
 
-  static async createProfile(req: Request, res: Response) {
+  static async createProfile(req: RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
       const allowedFields = ["firstname", "lastname", "country", "phoneNumber"];
       const updates = req.body;
 
@@ -68,13 +70,13 @@ export class UserController {
       console.log("user :>> ", user);
 
       User.updateOne({_id: id}, {...user}, {upsert: false})
-        .then((result) => {
+        .then((result: any) => {
           console.log("result :>> ", result);
           return res.status(201).json({
             message: "User Profile created successfully",
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "User profile creation failed",
             other: error,
@@ -84,14 +86,14 @@ export class UserController {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
-  static async updateProfile(req: Request, res: Response) {
+  static async updateProfile(req: RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
       const allowedFields = [
         "marketNews",
         "investmentNews",
@@ -123,13 +125,13 @@ export class UserController {
       console.log("user :>> ", user);
 
       User.updateOne({_id: id}, {...user}, {upsert: false})
-        .then((result) => {
+        .then((result: any) => {
           console.log("result :>> ", result);
           return res.status(201).json({
             message: "User update success",
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "User update failed",
             other: error,
@@ -139,31 +141,40 @@ export class UserController {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
-  static async updateProfileImage(req: MulterRequest, res: Response) {
+  static async updateProfileImage(req: MulterRequest & RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
-      let image = req.file
-        ? `${req.file.fieldname}/${req.file.filename}`
-        : null;
-      const user: any = {};
-      console.log("image :>> ", image, req.file);
-      // Update profile image if provided
-      if (image) {
-        user.image = image;
+      const {id} = req.currentUser || {};
+      
+      if (!req.file) {
+        return res.status(400).json({
+          message: "No file uploaded"
+        });
       }
+
+      // Generate secure file path with user ID
+      const image = generateSecureFilePath(
+        id!,
+        req.file.fieldname,
+        req.file.filename
+      );
+      
+      const user: any = { image };
+      console.log("image :>> ", image, req.file);
+      
+      // Update profile image
       User.updateOne({_id: id}, {...user}, {upsert: false})
-        .then((result) => {
+        .then((result: any) => {
           return res.status(201).json({
             message: "User image update success",
             data: image,
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "User image update failed",
             other: error,
@@ -173,21 +184,31 @@ export class UserController {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
-  static async uploadDocument(req: MulterRequest, res: Response) {
+  static async uploadDocument(req: MulterRequest & RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
       let {name, type} = req.body;
-      const file = req.file ? req.file.filename : null;
+
+      if (!req.file) {
+        return res.status(400).json({message: "Required file empty"});
+      }
+
+      // Generate secure file path with user ID
+      const file = generateSecureFilePath(
+        id!,
+        req.file.fieldname,
+        req.file.filename
+      );
 
       const user = await User.findById(id);
 
-      if (!file) {
-        res.status(400).json({message: "Required file empty"});
+      if (!user) {
+        return res.status(404).json({message: "User not found"});
       }
 
       const newDocument = Document({file: file, name, type, user: id});
@@ -197,13 +218,13 @@ export class UserController {
       user.documents.push(newDocument._id);
       await user
         .save()
-        .then((result) => {
+        .then((result: any) => {
           return res.status(201).json({
             message: "File upload success",
             result,
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "File upload failed",
             other: error,
@@ -213,15 +234,15 @@ export class UserController {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
-  static async deleteDocument(req: Request, res: Response) {
+  static async deleteDocument(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const userId = req["currentUser"].id;
+      const userId = req.currentUser?.id;
 
       const document = await Document.findById(id);
       if (!document) {
@@ -250,24 +271,24 @@ export class UserController {
       return res.status(500).json({
         success: false,
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
   // GET NOTIFICATION
-  static async getNotification(req: Request, res: Response) {
+  static async getNotification(req: RequestWithUser, res: Response) {
     try {
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
       console.log("id :>> ", id);
       Notification.find()
-        .then((response) => {
+        .then((response: any) => {
           return res.status(201).json({
             message: "success",
             response,
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "failed",
             other: error,
@@ -285,13 +306,13 @@ export class UserController {
       const {id} = req.params;
 
       Notification.updateOne({_id: id}, {status: "READ"}, {upsert: false})
-        .then((result) => {
+        .then((result: any) => {
           console.log("result :>> ", result);
           return res.status(201).json({
             message: "success",
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "failed",
             other: error,
@@ -300,7 +321,7 @@ export class UserController {
     } catch (error) {
       return res.status(500).json({
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
@@ -310,13 +331,13 @@ export class UserController {
       const {id} = req.params;
 
       Notification.updateOne({_id: id}, {status: "DELETE"}, {upsert: false})
-        .then((result) => {
+        .then((result: any) => {
           console.log("result :>> ", result);
           return res.status(201).json({
             message: "success",
           });
         })
-        .catch((error) => {
+        .catch((error: any) => {
           return res.status(404).json({
             message: "failed",
             other: error,
@@ -325,17 +346,17 @@ export class UserController {
     } catch (error) {
       return res.status(500).json({
         message: "Internal server error",
-        error: error.message,
+        error: (error as any).message,
       });
     }
   }
 
   // ADD BOOKMARKS
 
-  static async addBookmark(req: Request, res: Response) {
+  static async addBookmark(req: RequestWithUser, res: Response) {
     try {
       const {propertyId} = req.body;
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
 
       if (!propertyId) {
         return res.status(400).json({error: "Property ID is required"});
@@ -368,10 +389,10 @@ export class UserController {
   }
 
   // REMOVE BOOKMARKS
-  static async removeBookmark(req: Request, res: Response) {
+  static async removeBookmark(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const userId = req["currentUser"].id;
+      const userId = req.currentUser?.id;
 
       // Find and delete the bookmark
       const deletedBookmark = await Bookmark.findOneAndDelete({
@@ -390,9 +411,9 @@ export class UserController {
   }
 
   // GET BOOKMARKS
-  static async getBookmark(req: Request, res: Response) {
+  static async getBookmark(req: RequestWithUser, res: Response) {
     try {
-      const userId = req["currentUser"].id;
+      const userId = req.currentUser?.id;
 
       const data = await Bookmark.find({user: userId}).populate("property");
 
@@ -407,10 +428,10 @@ export class UserController {
   }
 
   // ADD SAVED FOR LATER
-  static async addSavedForLater(req: Request, res: Response) {
+  static async addSavedForLater(req: RequestWithUser, res: Response) {
     try {
       const {propertyId} = req.body;
-      const {id} = req["currentUser"];
+      const {id} = req.currentUser || {};
 
       if (!propertyId) {
         return res.status(400).json({error: "Property ID is required"});
@@ -444,9 +465,9 @@ export class UserController {
   }
 
   // GET SAVED FOR LATER
-  static async getSavedForLater(req: Request, res: Response) {
+  static async getSavedForLater(req: RequestWithUser, res: Response) {
     try {
-      const userId = req["currentUser"].id;
+      const userId = req.currentUser?.id;
 
       const data = await SavedForLater.find({user: userId}).populate(
         "property"
@@ -463,10 +484,10 @@ export class UserController {
   }
 
   // REMOVE SAVED FOR LATER
-  static async removeSavedForLater(req: Request, res: Response) {
+  static async removeSavedForLater(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const userId = req["currentUser"].id;
+      const userId = req.currentUser?.id;
 
       // Find and delete the savedForLater
       const deletedSavedForLater = await SavedForLater.findOneAndDelete({

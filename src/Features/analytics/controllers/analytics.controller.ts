@@ -4,6 +4,7 @@ import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.
 import mongoose from "mongoose";
 import Block from "../../blocks/schema/blocks.schema";
 import Property from "../../property/schema/property.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 export class AnalyticsController {
    
@@ -183,9 +184,9 @@ export class AnalyticsController {
 // 5. Total properties,
 // 6. Total bloks owned,
 // 7. Annual revenue
-  static async getPortfolio(req: Request, res: Response) {
+  static async getPortfolio(req: RequestWithUser, res: Response) {
     try {
-      const userId = req['currentUser'].id
+      const userId = req.currentUser?.id
       const { year } = req.query;
       const analytics = await Analytics.findOne({ year }).sort({ createdAt: -1 });
       
@@ -282,9 +283,9 @@ console.log('annualRentalYield :>> ', annualRentalYield);
 
   // 1. Total investment balance,
 // 2. Cash balance
-  static async getWallet(req: Request, res: Response) {
+  static async getWallet(req: RequestWithUser, res: Response) {
     try {
-      const userId = req['currentUser'].id
+      const userId = req.currentUser?.id
       const result = await Block.aggregate([
         {
           $match: {

@@ -30,7 +30,7 @@ export class AuthController {
         {$set: {status: "DEACTIVE"}},
         {new: true, runValidators: true}
       )
-        .then((data) => {
+        .then((data: any) => {
           console.log("data :>> ", data);
           if (data) {
             console.log(
@@ -46,7 +46,7 @@ export class AuthController {
                 { email, role: 'USER', verified: false, otp, status: "ACTIVE" }, // Update or create new
                 { upsert: true, new: true, setDefaultsOnInsert: true } // Create if not found
               ).populate('documents')
-                .then((user) => {
+                .then((user: any) => {
                   user = user._doc
                   const token = encrypt.generateToken({
                     id: user._id,
@@ -61,7 +61,7 @@ export class AuthController {
                       message: "Success",
                       response: {token,...user}
                     });
-                }).catch((e) => {
+                }).catch((e: any) => {
 
                   res.status(400).json({ message: "Please try again" });
                 })
@@ -72,7 +72,7 @@ export class AuthController {
             }
          
         })
-        .catch((e) => {
+        .catch((e: any) => {
           res.status(400).json({message: "Invalid otp"});
         });
     } catch (error) {

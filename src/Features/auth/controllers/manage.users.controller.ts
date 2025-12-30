@@ -13,7 +13,7 @@ import * as fs from "fs";
 import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.schema";
 // Extend Express Request to include Multer's file property
 interface MulterRequest extends Request {
-  file: multer.File;
+  file: Express.Multer.File;
 }
 export class ManageUsersController {
     // Admin routes
@@ -24,14 +24,14 @@ export class ManageUsersController {
         try {
            
             User.find()
-                .then((response) => {
+                .then((response: any) => {
                     return res.status(200).json({
          
                         message: "Users success",
                         response,
                     });
                 })
-                .catch((error) => {
+                .catch((error: any) => {
                     return res.status(404).json({
          
                         message: "Users failed",
@@ -39,7 +39,7 @@ export class ManageUsersController {
                     });
                 });
         } catch (error) {
-            return res.status(500).json({
+            return res.status(500).json({ 
                 success: false,
                 message: "Internal server error",
             });
@@ -51,14 +51,14 @@ export class ManageUsersController {
         try {
            
             User.findById(req.params.id).populate('documents')
-                .then((response) => {
+                .then((response: any) => {
                     return res.status(200).json({
          
                         message: "User success",
                         response,
                     });
                 })
-                .catch((error) => {
+                .catch((error: any) => {
                     return res.status(404).json({
          
                         message: "User failed",
@@ -94,13 +94,13 @@ export class ManageUsersController {
     
     
           User.updateOne({_id: id}, {...data}, {upsert: false})
-            .then((result) => {
+            .then((result: any) => {
               console.log("result :>> ", result);
               return res.status(201).json({
                 message: "User update success",
               });
             })
-            .catch((error) => {
+            .catch((error: any) => {
               return res.status(404).json({
                 message: "User update failed",
                 other: error,
@@ -110,7 +110,7 @@ export class ManageUsersController {
           return res.status(500).json({
             success: false,
             message: "Internal server error",
-            error: error.message,
+            error: (error as any).message,
           });
         }
       }

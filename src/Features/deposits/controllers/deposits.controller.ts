@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
 import Deposit from "../schema/deposits.schema";
 import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 class DepositController {
   
   // CREATE a deposit
-  static async create(req: Request, res: Response) {
+  static async create(req: RequestWithUser, res: Response) {
     try {
       const { investmentAccount, amount, lastBalance, paymentMethod, referenceId } = req.body;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const deposit = await Deposit.create({
         user,
@@ -28,9 +29,9 @@ class DepositController {
   }
 
   // GET all deposits for a user
-  static async findAll(req: Request, res: Response) {
+  static async findAll(req: RequestWithUser, res: Response) {
     try {
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const deposits = await Deposit.find({ user, status: { $ne: "DELETED" } })
         .populate("investmentAccount")
         .sort({ createdAt: -1 });
@@ -42,10 +43,10 @@ class DepositController {
   }
 
   // GET a single deposit by ID
-  static async findById(req: Request, res: Response) {
+  static async findById(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const deposit = await Deposit.findOne({ _id: id, user });
 
@@ -108,10 +109,10 @@ static async updateCallback(req: Request, res: Response) {
 
 
   // DELETE a deposit
-  static async delete(req: Request, res: Response) {
+  static async delete(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const deletedDeposit = await Deposit.findOneAndUpdate(
         { _id: id, user },

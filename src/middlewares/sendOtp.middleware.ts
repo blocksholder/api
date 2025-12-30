@@ -30,7 +30,7 @@ export const sendOtp = (
     });
     otpResponse
       .save()
-        .then((user) => {
+        .then((user: any) => {
           console.log('user :>> ', user);
         // Send email with OTP
         sendMail(
@@ -44,7 +44,7 @@ export const sendOtp = (
         return res.status(200).json({message: "OTP sent successfully"});
         })
       
-      .catch((e) => {
+      .catch((e: any) => {
         console.log('e :>> ', e);
         return res.status(404).json({
           message: "Please try again",
@@ -58,7 +58,7 @@ export const sendOtp = (
     console.error("Error sending OTP: ", error);
     return res.status(500).json({
       message: "Internal server error",
-      error: error.message,
+      error: (error as any).message,
     });
   }
 };

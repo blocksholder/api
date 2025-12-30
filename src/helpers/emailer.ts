@@ -35,7 +35,7 @@ export const sendMail = (to: string,firstname:string, subject: string, html: str
 }
 
 
-const SignupHtml = (firstname)=>
+const SignupHtml = (firstname: any)=>
 `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,7 +105,7 @@ const SignupHtml = (firstname)=>
 </html>
 `
 
-const resetHtml = (firstname,token) => 
+const resetHtml = (firstname: any, token: any) => 
   `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,7 +170,7 @@ const resetHtml = (firstname,token) =>
 </html>
 `
 
-const resetSuccessHtml = (firstname) => 
+const resetSuccessHtml = (firstname: any) => 
  
   `<!DOCTYPE html>
 <html lang="en">
@@ -235,7 +235,7 @@ const resetSuccessHtml = (firstname) =>
 `
 
 
-const shipmentHtml = (firstname,data) => 
+const shipmentHtml = (firstname: any, data: any) => 
   `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -299,7 +299,7 @@ const shipmentHtml = (firstname,data) =>
 </html>
 `
 
-const buyHtml = (firstname,data) => 
+const buyHtml = (firstname: any, data: any) => 
   `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -371,7 +371,7 @@ const buyHtml = (firstname,data) =>
 
 
 
-const otpHtml = (email,otp) => 
+const otpHtml = (email: any, otp: any) => 
   `<!DOCTYPE html>
 <html lang="en">
 <head>

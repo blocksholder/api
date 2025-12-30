@@ -3,13 +3,14 @@ import Property from "../../property/schema/property.schema";
 import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.schema";
 import Block from "../../blocks/schema/blocks.schema";
 import PurchaseOrder from "../schema/purchaseOrder.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 
 
 class PurchaseOrderController {
-  static async createPurchaseOrder(req: Request, res: Response) {
+  static async createPurchaseOrder(req: RequestWithUser, res: Response) {
     try {
-      const userId = req['currentUser'].id
+      const userId = req.currentUser?.id
       const { propertyId, investmentAccountId, quantity, costPerBlock, serviceFees } = req.body;
 
       const property = await Property.findById(propertyId);
@@ -25,7 +26,7 @@ class PurchaseOrderController {
       const investmentAccount = await InvestmentAccount.findById(investmentAccountId);
       console.log('investmentAccount :>> ', investmentAccount);
       if (!investmentAccount || investmentAccount.balance < totalBlockAmount) {
-        return res.status(400).json({ error: "Insufficient funds in Investment Account", currentBalance: investmentAccount.balance });
+        return res.status(400).json({ error: "Insufficient funds in Investment Account", currentBalance: investmentAccount?.balance });
       }
 
       investmentAccount.balance -= totalBlockAmount;
@@ -68,9 +69,9 @@ class PurchaseOrderController {
   }
 
     // Get all purchase orders
-    static async getAllPurchaseOrders(req: Request, res: Response) {
+    static async getAllPurchaseOrders(req: RequestWithUser, res: Response) {
       try {
-        const userId = req['currentUser'].id
+        const userId = req.currentUser?.id
         const purchaseOrders = await PurchaseOrder.find({userId})
           // .populate("propertyId")
           .populate("investmentAccountId");

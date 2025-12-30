@@ -7,7 +7,7 @@ import { authentication } from "../../../middlewares/authentication.middleware";
 const Router = express.Router();
 
 interface MulterRequest extends Request {
-  file: multer.File;
+  file?: Express.Multer.File;
 }
 
 // ----------------------------------------- Property ROUTES ---------------------------------------------------
@@ -16,7 +16,7 @@ Router.post("/",
   authentication,
     upload.single("property_image"),
     (req: MulterRequest, res: Response) => {
-  PropertyController.create(req, res);
+  PropertyController.create(req as any, res);
 });
 
 // LIST PROPERTY
@@ -36,7 +36,7 @@ Router.get("/:id",
 Router.patch("/:id",
     upload.single("property_image"),
     (req: MulterRequest, res: Response) => {
-  PropertyController.findAndUpdate(req, res);
+  PropertyController.findAndUpdate(req as any, res);
 });
 
 // ADD PROPERTY IMAGE
@@ -46,7 +46,7 @@ Router.post(
   // authorization(AdminModel,[Roles.ADMIN, Roles.USER],[Permission.ALL,Permission.UNIVERSITY_PROGRAMS]),
   upload.single("property_image"),
   (req: MulterRequest, res: Response) => {
-    PropertyController.addImage(req, res);
+    PropertyController.addImage(req as any, res);
   }
 );
 
@@ -57,7 +57,7 @@ Router.post(
   // authorization(AdminModel,[Roles.ADMIN, Roles.USER],[Permission.ALL,Permission.UNIVERSITY_PROGRAMS]),
   upload.single("property_document"),
   (req: MulterRequest, res: Response) => {
-    PropertyController.addDocument(req, res);
+    PropertyController.addDocument(req as any, res);
   }
 );
 
