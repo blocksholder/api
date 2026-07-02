@@ -3,15 +3,17 @@ import Property from "../schema/property.schema";
 import * as multer from "multer";
 import * as path from "path";
 import * as fs from "fs";
+import { RequestWithUser } from "../../../types/request-with-user";
+import { generateSecureFilePath } from "../../../helpers/filePathHelper";
 
 
 interface MulterRequest extends Request {
-  file: multer.File;
+  file?: Express.Multer.File;
 }
 
 export class PropertyController {
   
-  static async create(req: MulterRequest, res: Response) {
+  static async create(req: MulterRequest & RequestWithUser, res: Response) {
   
     try {
       const {
@@ -41,8 +43,17 @@ export class PropertyController {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      // Process uploaded image
-      let imageUrl = req.file ? `${req.file.fieldname}/${req.file.filename}` : null;
+      // Process uploaded image with secure file path
+      const userId = req.currentUser?.id;
+      let imageUrl = null;
+      
+      if (req.file && userId) {
+        imageUrl = generateSecureFilePath(
+          userId,
+          req.file.fieldname,
+          req.file.filename
+        );
+      }
 
 
       const newProperty = new Property({
@@ -104,14 +115,20 @@ export class PropertyController {
   }
     
 
-  static async findAndUpdate(req: MulterRequest, res: Response) {
+  static async findAndUpdate(req: MulterRequest & RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
       const updateData = req.body;
+      const userId = req.currentUser?.id;
     
-      // Process uploaded image if available
-      if (req.file) {
-        updateData.images = [{ url: `${req.file.fieldname}/${req.file.filename}` }];
+      // Process uploaded image if available with secure path
+      if (req.file && userId) {
+        const imageUrl = generateSecureFilePath(
+          userId,
+          req.file.fieldname,
+          req.file.filename
+        );
+        updateData.images = [{ url: imageUrl }];
       }
 
       if (!updateData.location || !updateData.property_details || !updateData.key_metrics) {
@@ -139,18 +156,26 @@ export class PropertyController {
   }
 
 
-  static async addImage(req: MulterRequest, res: Response) {
+  static async addImage(req: MulterRequest & RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
+      const userId = req.currentUser?.id;
   
       // Ensure an image was uploaded
       if (!req.file) {
         return res.status(400).json({ error: "No image file provided" });
       }
   
-      // Construct the image URL
-      const imageUrl = `${req.file.fieldname}/${req.file.filename}`;
+      // Construct secure image URL with user ID
+      const imageUrl = userId ? generateSecureFilePath(
+        userId,
+        req.file.fieldname,
+        req.file.filename
+      ) : null;
   
+      if (!imageUrl) {
+        return res.status(400).json({ error: "Unable to process image" });
+      }
       // Update the property by adding the new image to the `images` array
       const updatedProperty = await Property.findByIdAndUpdate(
         id,
@@ -170,19 +195,30 @@ export class PropertyController {
   
 
 
-  static async addDocument(req: MulterRequest, res: Response) {
+  static async addDocument(req: MulterRequest & RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
+      const userId = req.currentUser?.id;
   
       // Ensure a document was uploaded
       if (!req.file) {
         return res.status(400).json({ error: "No document file provided" });
       }
   
-      // Construct the document object
+      // Construct secure document object with user ID
+      const documentPath = userId ? generateSecureFilePath(
+        userId,
+        req.file.fieldname,
+        req.file.filename
+      ) : null;
+
+      if (!documentPath) {
+        return res.status(400).json({ error: "Unable to process document" });
+      }
+
       const document = {
         name: req.file.originalname,
-        path: `${req.file.fieldname}/${req.file.filename}`,
+        path: documentPath,
         date_time: new Date()
       };
   
@@ -243,7 +279,7 @@ export class PropertyController {
       console.log('req.body :>> ', req.body);
       console.log('property.images :>> ', property.images);
       // Find the image to remove
-      const imageIndex = property.images.findIndex(img => img._id.toString() === imageId);
+      const imageIndex = property.images.findIndex((img: any) => img._id.toString() === imageId);
       if (imageIndex === -1) {
         return res.status(400).json({ error: "Image not found" });
       }
@@ -279,7 +315,7 @@ export class PropertyController {
       }
   
       // Find the document to remove
-      const docIndex = property.documents.findIndex(doc => doc._id.toString() === documentId);
+      const docIndex = property.documents.findIndex((doc: any) => doc._id.toString() === documentId);
       if (docIndex === -1) {
         return res.status(400).json({ error: "Document not found" });
       }

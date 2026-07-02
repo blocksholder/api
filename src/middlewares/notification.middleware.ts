@@ -44,7 +44,7 @@ export const notification = (roles: Notification, model: any): any => {
 };
 
 
-const forgotPassword = (model) => {
+const forgotPassword = (model: any) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email} = req.body
@@ -75,7 +75,7 @@ const forgotPassword = (model) => {
         } catch (error) {
             return res
             .status(500)
-            .json({ message: "Internal server error", error:error.message});
+            .json({ message: "Internal server error", error:(error as any).message});
      
         }
         next();
@@ -83,7 +83,7 @@ const forgotPassword = (model) => {
 }
 
 
-const resetPassword = (model) => { 
+const resetPassword = (model: any) => { 
     return async (req: Request, res: Response, next: NextFunction) => {
         try { 
             const {otp, password} = req.body

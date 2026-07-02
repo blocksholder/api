@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import * as Express from 'express';
 import InvestmentAccount from "../schema/investmentAccount.schema";
 import * as multer from 'multer';
 import User from "../../auth/schema/user.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
+import { generateSecureFilePath } from "../../../helpers/filePathHelper";
 
-interface MulterRequest extends Request {
-  files?: multer.File[];
+interface MulterRequest extends RequestWithUser {
+  files?: Express.Multer.File[];
 }
 
 class InvestmentAccountController {
@@ -13,15 +14,19 @@ class InvestmentAccountController {
   static async create(req: MulterRequest, res: Response) {
     try {
       const { accountName, address, email } = req.body;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const files = req.files || []
 
       console.log('files :>> ', files);
 
-      // Map uploaded files to documents array
+      // Map uploaded files to documents array with secure paths
       const documents = files.map((file) => ({
         name: file.originalname,
-        path: `${file.fieldname}/${file.filename}` ,
+        path: user ? generateSecureFilePath(
+          user,
+          file.fieldname,
+          file.filename
+        ) : `${file.fieldname}/${file.filename}`,
         date_time: new Date(),
       }));
 
@@ -35,10 +40,10 @@ class InvestmentAccountController {
     }
   }
 
-  static async createPersonal(req: Request, res: Response) {
+  static async createPersonal(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.body;
-      const userId = id || req["currentUser"].id;
+      const userId = id || req.currentUser?.id;
       const userData = await User.findById(userId);
       console.log('userData :>> ', userData);
       if (!userData) {
@@ -58,9 +63,9 @@ class InvestmentAccountController {
   }
 
   // Get All Investment Accounts
-  static async getAll(req: Request, res: Response) {
+  static async getAll(req: RequestWithUser, res: Response) {
     try {
-      const accounts = await InvestmentAccount.find({ user: req["currentUser"].id, status: 'VERIFIED' }).sort({ createdAt: -1 });;
+      const accounts = await InvestmentAccount.find({ user: req.currentUser?.id, status: 'VERIFIED' }).sort({ createdAt: -1 });;
       return res.status(200).json({message:"Success", data:accounts});
     } catch (error) {
       return res.status(500).json({ error: "Internal server error" });
@@ -78,10 +83,10 @@ class InvestmentAccountController {
     }
   
   // Get Investment Account by ID
-  static async getById(req: Request, res: Response) {
+  static async getById(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
-      const account = (await InvestmentAccount.findOne({ _id: id, user: req["currentUser"].id }));
+      const account = (await InvestmentAccount.findOne({ _id: id, user: req.currentUser?.id }));
 
       if (!account) {
         return res.status(404).json({ error: "Investment account not found" });
@@ -94,7 +99,7 @@ class InvestmentAccountController {
   }
 
   // Update Investment Account Status
-  static async updateStatus(req: Request, res: Response) {
+  static async updateStatus(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -120,10 +125,10 @@ class InvestmentAccountController {
   }
 
   // Delete Investment Account
-  static async delete(req: Request, res: Response) {
+  static async delete(req: RequestWithUser, res: Response) {
     try {
       const { id } = req.params;
-      const user = req["currentUser"].id
+      const user = req.currentUser?.id
       const deletedAccount = await InvestmentAccount.findByIdAndUpdate(
         { _id: id, user },
         { status: "DELETED" },

@@ -1,12 +1,14 @@
 
 import { Express, Request, Response } from "express"
-import * as express from 'express';
+import express from 'express';
 import * as bodyParser from "body-parser";
 import { Router } from "./routes/all.routes";
 import "reflect-metadata";
 import * as dotenv from 'dotenv';
 import { errorHandler } from "./middlewares/errorHandler.middleware";
-import * as cors from 'cors';
+import { secureFileAccess, serveFile } from "./middlewares/fileAccess.middleware";
+import { authentication } from "./middlewares/authentication.middleware";
+import cors from 'cors';
 import path = require("path");
 import connectToDatabase from "./database/data-source";
 const swaggerUi = require("swagger-ui-express");
@@ -22,12 +24,19 @@ app.use(errorHandler)
 app.use(Router)
 
 
-app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDocument)); 
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Secure file download endpoint - requires authentication and verifies ownership
+app.get('/files/download/:userId/:fieldName/:fileName', authentication, (req: any, res: Response, next) => {
+  const fileAccessMiddleware = require('./middlewares/fileAccess.middleware').secureFileAccess;
+  return fileAccessMiddleware(req, res, next);
+});
 
-
-app.use('/public', express.static(path.join(__dirname, 'public')));
+// Secure file viewing endpoint - requires authentication and verifies ownership
+app.get('/files/view/:userId/:fieldName/:fileName', authentication, (req: any, res: Response, next) => {
+  const fileServeMiddleware = require('./middlewares/fileAccess.middleware').serveFile;
+  return fileServeMiddleware(req, res, next);
+});
 
 app.get('/', (req: Request, res: Response) => { 
     res.json({

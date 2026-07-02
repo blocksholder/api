@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { Status } from "../enums/status.enum";
 import User from "../Features/auth/schema/user.schema";
+import { RequestWithUser } from "../types/request-with-user";
 
 export const authorization = (roles: string[]): any => {
 
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
    
     const user = await User.findOne({
-      where: { id: req["currentUser"].id },
+      where: { id: req.currentUser?.id },
     }); 
     if (!roles.includes(user.role)) {
       return res.status(403).json({ message: "Forbidden" });

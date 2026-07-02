@@ -4,9 +4,10 @@ import InvestmentAccountController from "../controllers/investmentAccount.contro
 import {authentication} from "../../../middlewares/authentication.middleware";
 import {upload} from "../../../helpers/uploader";
 import * as multer from "multer";
+import { RequestWithUser } from "../../../types/request-with-user";
 
-interface MulterRequest extends Request {
-  files?: multer.File[];
+interface MulterRequest extends RequestWithUser {
+  files?: Express.Multer.File[];
 }
 
 const Router = express.Router();
@@ -16,7 +17,7 @@ Router.post(
   "/",
   authentication,
   upload.array("investment_documents"),
-  (req: MulterRequest, res: Response) => {
+  (req: any, res: Response) => {
     InvestmentAccountController.create(req, res);
   }
 );
@@ -25,34 +26,34 @@ Router.post(
 Router.post(
   "/personal",
   authentication,
-  (req: Request, res: Response) => {
-    InvestmentAccountController.createPersonal(req, res);
+  (req: RequestWithUser, res: Response) => {
+    InvestmentAccountController.createPersonal(req as any, res);
   }
 );
 
 // Get All Investment Accounts
-Router.get("/", authentication, (req: Request, res: Response) => {
-  InvestmentAccountController.getAll(req, res);
+Router.get("/", authentication, (req: RequestWithUser, res: Response) => {
+  InvestmentAccountController.getAll(req as any, res);
 });
 
 // Get All Investment Accounts
-Router.get("/admin", authentication, (req: Request, res: Response) => {
-  InvestmentAccountController.getAllAdmin(req, res);
+Router.get("/admin", authentication, (req: RequestWithUser, res: Response) => {
+  InvestmentAccountController.getAllAdmin(req as any, res);
 });
 
 // Get Single Investment Account
-Router.get("/:id", authentication, (req: Request, res: Response) => {
-  InvestmentAccountController.getById(req, res);
+Router.get("/:id", authentication, (req: RequestWithUser, res: Response) => {
+  InvestmentAccountController.getById(req as any, res);
 });
 
 // Update Investment Account Status
-Router.patch("/:id", authentication, (req: Request, res: Response) => {
-  InvestmentAccountController.updateStatus(req, res);
+Router.patch("/:id", authentication, (req: RequestWithUser, res: Response) => {
+  InvestmentAccountController.updateStatus(req as any, res);
 });
 
 // Delete Investment Account
-Router.delete("/:id", authentication, (req: Request, res: Response) => {
-  InvestmentAccountController.delete(req, res);
+Router.delete("/:id", authentication, (req: RequestWithUser, res: Response) => {
+  InvestmentAccountController.delete(req as any, res);
 });
 
 export default Router;

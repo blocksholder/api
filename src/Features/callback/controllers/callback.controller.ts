@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import CallBack from "../schema/callback.schema";
 import mongoose from "mongoose";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 class CallbackController {
   // Create Callback Request
-  static async create(req: Request, res: Response) {
+  static async create(req: RequestWithUser, res: Response) {
     try {
-      const { id } = req['currentUser'];
+      const { id } = req.currentUser || {};
       const { fullname, email, message } = req.body;
 
       if (!fullname || !email || !message) {
@@ -23,9 +24,9 @@ class CallbackController {
   }
 
   // Get All Callback Requests
-  static async findAll(req: Request, res: Response) {
+  static async findAll(req: RequestWithUser, res: Response) {
     try {
-      const userId = new mongoose.Types.ObjectId(req['currentUser'].id);
+      const userId = new mongoose.Types.ObjectId(req.currentUser?.id);
       const requests = await CallBack.find({user: userId}).sort({ createdAt: -1 });
       return res.status(200).json({message:'Success', data:requests});
     } catch (error) {

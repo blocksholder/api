@@ -1,13 +1,14 @@
 import {Request, Response} from "express";
 import WithdrawalRequest from "../schema/withdrawals.schema";
 import InvestmentAccount from "../../investmentAccount/schema/investmentAccount.schema";
+import { RequestWithUser } from "../../../types/request-with-user";
 
 export class WithdrawalsController {
   // CREATE A WITHDRAWAL REQUEST
-  static async create(req: Request, res: Response) {
+  static async create(req: RequestWithUser, res: Response) {
     try {
       const {paymentDetails, investmentAccount, amount, lastBalance} = req.body;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       if (!paymentDetails || !investmentAccount || !amount) {
         return res.status(400).json({error: "Missing required fields"});
@@ -101,10 +102,10 @@ export class WithdrawalsController {
   }
 
   // DELETE A WITHDRAWAL REQUEST
-  static async delete(req: Request, res: Response) {
+  static async delete(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const deletedRequest = await WithdrawalRequest.findOneAndUpdate(
         {_id: id, user},
@@ -125,9 +126,9 @@ export class WithdrawalsController {
   }
 
   // GET ALL WITHDRAWAL REQUESTS FOR A USER
-  static async findAll(req: Request, res: Response) {
+  static async findAll(req: RequestWithUser, res: Response) {
     try {
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
       const requests = await WithdrawalRequest.find({
         user,
         status: {$ne: "DELETED"},
@@ -143,10 +144,10 @@ export class WithdrawalsController {
   }
 
   // GET SINGLE WITHDRAWAL REQUEST
-  static async findById(req: Request, res: Response) {
+  static async findById(req: RequestWithUser, res: Response) {
     try {
       const {id} = req.params;
-      const user = req["currentUser"].id;
+      const user = req.currentUser?.id;
 
       const request = await WithdrawalRequest.findOne({_id: id, user});
 

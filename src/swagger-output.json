@@ -2386,7 +2386,7 @@
         "properties": {
           "url": {
             "type": "string",
-            "example": "http://localhost:3000"
+            "example": "http://localhost:4000"
           },
           "description": {
             "type": "string",
