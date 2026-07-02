@@ -40,7 +40,7 @@
    },
    "scripts": {
       "start": "node build/app.js",
-      "build": "tsc",
+      "build": "tsc && node -e \"require('fs').copyFileSync('src/swagger-output.json','build/swagger-output.json')\"",
       "dev": "nodemon src/app.ts",
       "type-start": "ts-node src/app.ts",
       "typeorm": "typeorm-ts-node-commonjs",
